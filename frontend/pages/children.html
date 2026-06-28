@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    body { background: transparent; color: #e2e8f0; font-family: 'Inter', sans-serif; padding: 1rem; }
+    body, .jar, .jar h4, .parent-card, .input-small {
+      transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base);
+    }
+    .jar-container { display: flex; gap: 2rem; margin-top: 1.5rem; justify-content: center; }
+    .jar { background: var(--surface-base); border: 2px dashed var(--gold-400); border-radius: 12px; padding: 1.5rem; text-align: center; width: 200px; }
+    .jar h4 { margin: 0 0 1rem 0; color: var(--gold-300); font-family: var(--font-display); }
+    .progress { background: var(--surface-bg); height: 20px; border-radius: 10px; overflow: hidden; margin-top: 1rem; }
+    .progress-bar { background: var(--success); height: 100%; width: 50%; transition: width 0.5s ease; }
+    .parent-card { background: var(--surface-raised); border: 1px solid var(--surface-border); border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; }
+    .input-small { background: var(--surface-bg); border: 1px solid var(--surface-border); color: white; padding: 4px 8px; border-radius: 4px; font-size: 13px; width: 80px; }
+    
+    /* Light Mode Overrides */
+    :root.light-mode body {
+      color: #0f172a;
+    }
+    :root.light-mode .jar {
+      background: var(--surface-bg);
+      border-color: var(--brand-500);
+      color: #0f172a;
+    }
+    :root.light-mode .jar h4 {
+      color: var(--brand-500);
+    }
+    :root.light-mode .parent-card {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    :root.light-mode .input-small {
+      background: white;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align: center;">
+    <h2 style="color: var(--brand-200); font-family: var(--font-display); margin: 0 0 4px 0;">Children's Goal Jars</h2>
+    <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Gamified visual target jars linked to parenting authorization controls.</p>
+  </div>
+  <div class="jar-container">
+    <div class="jar">
+      <h4>Bicycle Goal</h4>
+      <p id="bikeProgressText">₹2,500 / ₹5,000</p>
+      <div class="progress"><div class="progress-bar" id="bikeBar" style="width: 50%;"></div></div>
+    </div>
+    <div class="jar">
+      <h4>Game Console</h4>
+      <p id="gameProgressText">₹1,000 / ₹10,000</p>
+      <div class="progress"><div class="progress-bar" id="gameBar" style="width: 10%; background: var(--warning);"></div></div>
+    </div>
+  </div>
+
+  <div class="parent-card">
+    <h4 style="color: var(--text-accent); margin: 0 0 0.5rem 0; font-family: var(--font-display);">Parent Control Panel (Linked: Arjun Sharma)</h4>
+    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">Set allowance schedules, transaction spending caps, and approve minor outflows.</p>
+    <div style="display: flex; gap: var(--space-4); align-items: center; justify-content: space-between; flex-wrap: wrap;">
+      <div>
+        <span style="font-size: 13px;">Daily Spending Limit: </span>
+        <input type="number" id="limitInput" class="input-small" value="500">
+      </div>
+      <div>
+        <button class="btn-primary" style="padding: 4px 12px; font-size: 12px;" onclick="addAllowance()">Drop Weekly Allowance (₹200)</button>
+        <button class="btn-secondary" style="padding: 4px 12px; font-size: 12px; margin-left: 5px;" onclick="simulatePurchase()">Simulate Minor Purchase (₹600)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let bikeSaved = 2500;
+    let bikeTarget = 5000;
+    
+    function addAllowance() {
+      bikeSaved = Math.min(bikeSaved + 200, bikeTarget);
+      document.getElementById("bikeProgressText").textContent = `₹${bikeSaved} / ₹${bikeTarget}`;
+      document.getElementById("bikeBar").style.width = `${(bikeSaved/bikeTarget * 100)}%`;
+      
+      // Try to alert parent in parent index
+      if (window.parent && window.parent.loadDashboard) {
+        // Log WHS or consent action
+        alert("Weekly allowance dropped! Parent account debited. Goal jar updated.");
+      }
+    }
+
+    function simulatePurchase() {
+      const limit = parseInt(document.getElementById("limitInput").value);
+      const amt = 600; // Simulated purchase
+      
+      if (amt > limit) {
+        // Trigger Child Limit breach
+        if (window.parent && window.parent.triggerGlobalStepUp) {
+          window.parent.triggerGlobalStepUp(
+            "CHILD_LIMIT_BREACH_VERIFICATION",
+            3, // Parent L3 auth required
+            () => {
+              alert("Parent authorized the purchase! Outflow of ₹600 processed successfully.");
+            },
+            () => {
+              alert("Transaction Blocked! Purchase exceeds parent limit of ₹" + limit + ".");
+            }
+          );
+        }
+      } else {
+        alert("Purchase processed successfully within allowance limits!");
+      }
+    }
+  </script>
+</body>
+</html>

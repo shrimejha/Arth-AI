@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avatar Base — AI Digital Wealth Dashboard</title>
+  <meta name="description" content="AI-Powered Digital Wealth Management System with SEBI compliance and RBI data-localization.">
+  <link rel="stylesheet" href="./css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* Premium visual overrides and overrides for single-page dashboard layout */
+    body {
+      background-color: var(--surface-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 15%, rgba(29, 78, 216, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 55%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: var(--space-6);
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: var(--space-6);
+      width: 100%;
+    }
+
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+
+    .consent-card {
+      background: var(--surface-base);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+    }
+
+    .consent-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+      font-size: 13px;
+    }
+
+    .consent-item input[type="checkbox"] {
+      margin-top: 3px;
+      cursor: pointer;
+    }
+
+    .consent-item label {
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .consent-item label strong {
+      color: var(--text-primary);
+      display: block;
+    }
+
+    /* Modal styles for Step-Up Auth */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(6, 11, 24, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-base);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--surface-border-accent);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      width: 420px;
+      box-shadow: var(--shadow-xl);
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-card h3 {
+      font-family: var(--font-display);
+      margin-bottom: var(--space-3);
+      color: var(--text-primary);
+    }
+
+    .modal-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-6);
+    }
+
+    .otp-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-bottom: var(--space-6);
+      text-align: left;
+    }
+
+    .otp-input-group label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .otp-field {
+      background: var(--surface-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      color: white;
+      padding: var(--space-3);
+      font-size: 18px;
+      letter-spacing: var(--space-2);
+      text-align: center;
+      outline: none;
+    }
+
+    .otp-field:focus {
+      border-color: var(--brand-400);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+
+    .btn {
+      flex: 1;
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-500));
+    }
+
+    .btn-secondary {
+      background: var(--surface-overlay);
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover {
+      color: white;
+      background: var(--surface-glass-hover);
+    }
+
+    .biometric-btn {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px dashed var(--success);
+      color: var(--text-success);
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      transition: all var(--transition-fast);
+    }
+
+    .biometric-btn:hover {
+      background: rgba(16, 185, 129, 0.2);
+    }
+
+    .avatar-panel {
+      background: linear-gradient(135deg, rgba(29, 78, 216, 0.15) 0%, rgba(99, 102, 241, 0.08) 100%);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+      display: flex;
+      gap: var(--space-4);
+      align-items: center;
+    }
+
+    .avatar-icon-large {
+      font-size: 48px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-full);
+      padding: var(--space-2);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+    }
+
+    .avatar-speech {
+      font-style: italic;
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .sebi-header-disclosure {
+      background: rgba(239, 68, 68, 0.06);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-6);
+      line-height: 1.5;
+    }
+    
+    .demo-profiles-container {
+      margin-top: var(--space-2);
+      border-top: 1px solid var(--surface-border);
+      padding-top: var(--space-4);
+    }
+    
+    .demo-profiles-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-3);
+    }
+    
+    .demo-profile-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-3);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-align: left;
+    }
+    
+    .demo-profile-card:hover {
+      border-color: var(--brand-400);
+      background: var(--surface-overlay);
+      transform: translateY(-1px);
+    }
+    
+    .demo-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--surface-glass);
+      object-fit: cover;
+    }
+    
+    .demo-profile-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .demo-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .demo-role {
+      font-size: 9px;
+      color: var(--text-secondary);
+    }
+    
+    /* Goal Modal Styling to prevent overflow and enforce full width */
+    #goalModal * {
+      box-sizing: border-box;
+    }
+    #goalModal .auth-input {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Authentication Overlay -->
+  <div id="authOverlay" class="auth-overlay">
+    <!-- Sign-In Screen -->
+    <div id="signInCard" class="auth-card">
+      <div>
+        <h2>Sign In</h2>
+        <p>Access your AI-Powered Wealth Account</p>
+      </div>
+      
+      <div id="loginErrorMsg" class="auth-error-msg">
+        Invalid credentials. Try again.
+      </div>
+      
+      <div class="auth-form-group">
+        <label for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" class="auth-input" placeholder="e.g. arjun">
+      </div>
+      
+      <div class="auth-form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" class="auth-input" placeholder="••••••••">
+      </div>
+      
+      <div class="demo-profiles-container">
+        <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-3); text-align: left;">Quick Select Demo Profile</div>
+        <div class="demo-profiles-grid">
+          <div class="demo-profile-card" onclick="quickLogin('arjun')">
+            <img src="./images/avatar_arjun.png" class="demo-avatar" alt="Arjun">
+            <div class="demo-profile-info">
+              <span class="demo-name">Arjun Sharma</span>
+              <span class="demo-role">Young Employed</span>
+            </div>
+          </div>
+          <div class="demo-profile-card" onclick="quickLogin('meena')">
+            <img src="./images/avatar_meena.png" class="demo-avatar" alt="Meena">
+            <div class="demo-profile-info">
+              <span class="demo-name">Meena Devi</span>
+              <span class="demo-role">Senior Citizen</span>
+            </div>
+          </div>
+          <div class="demo-profile-card" onclick="quickLogin('priya')">
+            <img src="./images/avatar_priya.png" class="demo-avatar" alt="Priya">
+            <div class="demo-profile-info">
+              <span class="demo-name">Priya Iyer</span>
+              <span class="demo-role">Student</span>
+            </div>
+          </div>
+          <div class="demo-profile-card" onclick="quickLogin('rahul')">
+            <img src="./images/avatar_rahul.png" class="demo-avatar" alt="Rahul">
+            <div class="demo-profile-info">
+              <span class="demo-name">Rahul (Minor)</span>
+              <span class="demo-role">Child / Minor</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button id="loginSubmitBtn" class="btn btn-primary" style="margin-top: 5px;">Continue</button>
+    </div>
+
+    <!-- 2FA Security Screen -->
+    <div id="mfaCard" class="auth-card hidden">
+      <div>
+        <h2>Multi-Factor Security</h2>
+        <p id="mfaTypeSubtitle">Complete your second-layer verification</p>
+      </div>
+      
+      <div id="mfaOverlayErrorMsg" class="auth-error-msg">
+        Authentication failed. Please check biometrics or try code '1234'.
+      </div>
+
+      <!-- Biometric scanner mock -->
+      <div id="mfaBiometricOption" style="display: none;">
+        <div class="scanner-container">
+          <svg class="fingerprint-icon" id="loginFingerprintSvg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0-1.657 1.343-3 3-3h2M6.5 12h11m-11 5h11M12 2a10 10 0 0 0-10 10c0 5.5 4.5 10 10 10s10-4.5 10-10A10 10 0 0 0 12 2zm0 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+          </svg>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: var(--space-4);">Click fingerprint to simulate biometric verification.</p>
+      </div>
+
+      <!-- OTP code entry mock -->
+      <div id="mfaOtpOption" style="display: none;">
+        <div class="auth-form-group" style="text-align: center; margin: var(--space-4) 0;">
+          <label for="loginOtpCode" style="display: block; margin-bottom: 8px;">Enter 4-Digit SMS Code</label>
+          <input type="text" id="loginOtpCode" class="otp-field" placeholder="xxxx" maxlength="4" style="margin: 0 auto; width: 140px; border: 1px solid var(--surface-border); background: var(--surface-bg); color: white; padding: var(--space-3); font-size: 18px; letter-spacing: var(--space-2); text-align: center; border-radius: var(--radius-md); outline: none;">
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">For testing, enter code: <strong>1234</strong></p>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button id="mfaResetBtn" class="btn btn-secondary">Back</button>
+        <button id="mfaVerifyBtnOverlay" class="btn btn-primary">Verify & Log In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top bar -->
+  <header class="app-topbar" style="justify-content: space-between; height: 64px;">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="logo-text">Avatar<span>Base</span></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: var(--space-5);">
+      <div style="font-size: 12px; color: var(--text-muted); display: flex; gap: var(--space-4);">
+        <span>RBI Region: ap-south-1 (Mumbai)</span>
+        <span>TLS 1.3 | AES-256 Enabled</span>
+      </div>
+      <button id="langToggleBtn" style="background: var(--surface-overlay); border: 1px solid var(--surface-border); color: var(--text-secondary); padding: 5px 10px; border-radius: var(--radius-md); font-size: 11px; font-weight: 600; cursor: pointer; transition: all var(--transition-fast);" title="Switch language">🌐 EN</button>
+      <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Night/Day Mode" title="Toggle theme">
+        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="m4.93 4.93 1.41 1.41"></path>
+          <path d="m17.66 17.66 1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="m6.34 17.66-1.41 1.41"></path>
+          <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Dashboard layout -->
+  <div class="dashboard-grid">
+    <!-- Sidebar -->
+    <div class="sidebar-panel">
+      <!-- Profile Badge Card -->
+      <div class="card" style="padding: var(--space-5);">
+        <div class="profile-card-badge">
+          <div class="profile-badge-avatar" id="sidebarAvatarIcon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-accent)" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+              <line x1="9" y1="9" x2="9.01" y2="9"></line>
+              <line x1="15" y1="9" x2="15.01" y2="9"></line>
+            </svg>
+          </div>
+          <div>
+            <h4 id="sidebarProfileName" style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0;">Guest</h4>
+            <span id="sidebarProfileRole" style="font-size: 11px; color: var(--text-secondary);">Young Employed</span>
+          </div>
+        </div>
+        
+        <!-- Sidebar Tabs Links -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-4);" id="mainNavigationTabs">
+          <button class="nav-item active" data-tab="overview">Overview & Score</button>
+          <button class="nav-item" data-tab="nudges" style="position: relative;">Action Nudges <span id="nudgeBadge" style="display:none; position: absolute; top: 6px; right: 8px; background: var(--danger); color: white; font-size: 9px; font-weight: 700; border-radius: 99px; padding: 1px 5px; line-height: 14px;"></span></button>
+          <button class="nav-item" data-tab="goals">My Goals</button>
+          <button class="nav-item" data-tab="consent">Data Consent</button>
+          <button class="nav-item" data-tab="family">Family Wealth</button>
+          <button class="nav-item" data-tab="rm-copilot">RM Copilot</button>
+          <button class="nav-item" data-tab="settings">Settings</button>
+        </div>
+        
+        <button id="sidebarSignOutBtn" class="signout-btn" style="width: 100%; margin-top: var(--space-6);">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-6); width: 100%;">
+      <!-- SEBI Regulatory Header (Non-dismissible) -->
+      <div class="sebi-header-disclosure">
+        <strong>SEBI Compliance Disclosures:</strong> Wealth Health Scores and generated advisory heuristics processed under simulation. Equity recommendations are validated against Research Analyst reference registries. Avatar Base is an automated agent — not a human SEBI-registered advisor. Past performance is not indicative of future returns.
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="tab-content-wrapper" style="width: 100%;">
+        
+        <!-- 1. Overview Tab -->
+        <div id="tab-overview" class="subtab-content active">
+          <!-- Top Row: WHS + Persona Greeting -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1.8fr; gap: var(--space-6);">
+            <!-- WHS Gauge Card -->
+            <div class="card whs-card" id="whsGaugeCard" style="padding: var(--space-5);">
+              <div class="card-header" style="margin-bottom: var(--space-3);">
+                <div>
+                  <div class="card-title">Wealth Health Score</div>
+                  <div class="card-subtitle">5-Pillar Diagnostics</div>
+                </div>
+                <div class="whs-grade">
+                  <span class="whs-grade-badge" id="whsGradeBadge">A</span>
+                </div>
+              </div>
+
+              <div class="whs-gauge-container">
+                <div class="gauge-wrapper">
+                  <svg class="gauge-svg" viewBox="0 0 160 100">
+                    <path class="gauge-bg-arc" d="M 10 90 A 70 70 0 0 1 150 90" />
+                    <path class="gauge-fill-arc" d="M 10 90 A 70 70 0 0 1 150 90" stroke="#10b981" />
+                    <text x="80" y="80" class="gauge-score-text" id="whsScoreText">85</text>
+                    <text x="80" y="93" class="gauge-label-text">WHS INDEX</text>
+                  </svg>
+                </div>
+                <div class="whs-meta">
+                  <div class="pillar-bars" id="whsPillars">
+                    <!-- Rendered dynamically -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- WHS Trend Sparkline -->
+              <div style="margin-top: var(--space-4); border-top: 1px solid var(--surface-glass); padding-top: var(--space-3);">
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">6-Month WHS Trend</div>
+                <div style="position: relative; height: 48px; width: 100%;">
+                  <canvas id="whsSparkline"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Avatar Persona Greeting Card -->
+            <div class="avatar-panel">
+              <div class="avatar-icon-large" id="avatarEmoji">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                  <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                  <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                </svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                <h4 style="font-family: var(--font-display); color: var(--text-accent); margin: 0;" id="avatarNameHeading">Arya (AI Persona)</h4>
+                <div class="avatar-speech" id="avatarSpeechText">
+                  "Connecting user profile... We will scan your financials securely and offer proactive advice tags."
+                </div>
+                <div style="display: flex; gap: var(--space-3); margin-top: var(--space-2);">
+                  <span style="font-size: 11px; color: var(--text-muted); background: var(--surface-overlay); padding: 4px 8px; border-radius: var(--radius-sm);" id="avatarToneBadge">Tone: Efficient</span>
+                  <button class="btn btn-secondary" style="padding: 4px var(--space-3); font-size: 11px; flex: none;" onclick="triggerRMHandoff()">Talk to RM Advisor</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Worth Snapshot Card -->
+          <div class="card" style="padding: var(--space-5); margin-top: var(--space-6);" id="netWorthCard">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-4);">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-1);">Total Net Worth</div>
+                <div style="font-size: 32px; font-weight: 800; color: var(--text-success); line-height: 1;" id="netWorthValue">—</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Across investments, savings &amp; holdings</div>
+              </div>
+              <div style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap;" id="netWorthBreakdown">
+                <!-- Filled by JS -->
+              </div>
+              <button class="btn btn-secondary" style="font-size: 11px; padding: 5px 12px; flex: none;" onclick="goToFamilyTab()">View Family Wealth →</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Segment Module Iframe -->
+          <div class="card" style="padding: var(--space-5); min-height: 480px; margin-top: var(--space-6);">
+            <h3 class="card-title" style="margin-bottom: var(--space-4);" id="segmentDashboardTitle">Segment Activity Module</h3>
+            <iframe id="moduleFrame" src="about:blank" style="width: 100%; height: 420px; border: none; border-radius: var(--radius-md); background: transparent;"></iframe>
+          </div>
+        </div>
+
+        <!-- 2. Action Nudges Tab -->
+        <div id="tab-nudges" class="subtab-content">
+          <div class="card" style="padding: var(--space-5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
+              <h3 class="card-title">Tailored Financial Action Nudges</h3>
+              <span style="font-size: 11px; color: var(--text-muted); background: var(--surface-overlay); padding: 4px 10px; border-radius: var(--radius-sm);">AI Confidence — Logged &amp; Audited</span>
+            </div>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--space-5);">Real-time personalized advisory suggestions validated against regulatory compliance logic.</p>
+            <div class="recommendation-grid" id="advisoryCardsGrid">
+              <div style="color: var(--text-muted); font-size: 13px; text-align: center; grid-column: 1 / -1; padding: var(--space-6);">Loading dynamic advisory nudges...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2b. Goals Tab -->
+        <div id="tab-goals" class="subtab-content">
+          <div class="card" style="padding: var(--space-6);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5);">
+              <div>
+                <h3 class="card-title" style="margin-bottom: 2px;">My Financial Goals</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Track, manage and fund your life milestones.</p>
+              </div>
+              <button class="btn btn-primary" style="font-size: 12px; padding: 6px 14px;" onclick="addGoalAction()">+ Add Goal</button>
+            </div>
+            <div id="goalsContainer" style="display: flex; flex-direction: column; gap: var(--space-5);"></div>
+          </div>
+        </div>
+
+        <!-- 3. Consent Tab -->
+        <div id="tab-consent" class="subtab-content">
+          <div class="card" style="padding: var(--space-6);">
+            <h3 class="card-title" style="margin-bottom: var(--space-1);">DPDP Consent Manager</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--space-5);">In compliance with Digital Personal Data Protection Act 2023. Revoke or grant granular access permissions.</p>
+            
+            <div id="consentCheckboxes" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5);">
+              <div class="consent-card">
+                <div class="consent-item">
+                  <input type="checkbox" id="consent-spending" checked data-category="SPENDING_ANALYSIS">
+                  <label for="consent-spending">
+                    <strong>Spending Analytics</strong>
+                    Analyze UPI & debit history for budgeting.
+                  </label>
+                </div>
+              </div>
+              <div class="consent-card">
+                <div class="consent-item">
+                  <input type="checkbox" id="consent-investment" checked data-category="INVESTMENT_DATA">
+                  <label for="consent-investment">
+                    <strong>Investment Holdings</strong>
+                    Fetch MF/Demat balances for drift checks.
+                  </label>
+                </div>
+              </div>
+              <div class="consent-card">
+                <div class="consent-item">
+                  <input type="checkbox" id="consent-tax" checked data-category="TAX_PROFILING">
+                  <label for="consent-tax">
+                    <strong>Tax Optimizer</strong>
+                    Compare tax regimes & track 80C headroom.
+                  </label>
+                </div>
+              </div>
+              <div class="consent-card">
+                <div class="consent-item">
+                  <input type="checkbox" id="consent-insurance" checked data-category="INSURANCE_DATA">
+                  <label for="consent-insurance">
+                    <strong>Insurance Assessment</strong>
+                    Scan insurance cover details for gaps.
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Family Savings Tab -->
+        <div id="tab-family" class="subtab-content">
+          <div class="card" style="padding: var(--space-5);">
+            <h3 class="card-title" style="margin-bottom: var(--space-2);">Family Wealth Hub</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--space-5);">Consolidated balance, asset classes, and segment diagnostics across linked family portfolios.</p>
+            
+            <div class="family-summary-row">
+              <div class="card" style="padding: var(--space-4); background: var(--surface-bg);">
+                <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Total Family Net Worth</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--text-success); margin-top: 4px;" id="familyNetWorth">₹22,42,243</div>
+              </div>
+              <div class="card" style="padding: var(--space-4); background: var(--surface-bg);">
+                <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Average Health Score</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--text-accent); margin-top: 4px;" id="familyAvgScore">85/100</div>
+              </div>
+              <div class="card" style="padding: var(--space-4); background: var(--surface-bg);">
+                <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Linked Family Members</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">4 Active</div>
+              </div>
+            </div>
+
+            <div class="family-table-container">
+              <table class="family-table">
+                <thead>
+                  <tr>
+                    <th>Member Profile</th>
+                    <th>Lifecycle Role</th>
+                    <th>WHS Score</th>
+                    <th>Estimated Assets</th>
+                    <th>Primary Assets</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="familyTableBody">
+                  <!-- Generated dynamically in app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- RM Copilot Tab -->
+        <div id="tab-rm-copilot" class="subtab-content">
+          <iframe id="rmCopilotFrame" src="./pages/rm-copilot.html" style="width:100%; height: 680px; border: none; border-radius: var(--radius-xl); background: transparent;"></iframe>
+        </div>
+
+        <!-- 5. Settings Tab -->
+        <div id="tab-settings" class="subtab-content">
+          <div class="settings-grid">
+            
+            <div class="settings-section">
+              <h3 class="settings-section-title">Security & Authentications</h3>
+              
+              <div class="settings-row">
+                <div>
+                  <label style="display:block; font-weight:600; color:var(--text-primary);">Enable Biometric 2FA</label>
+                  <span style="font-size:11px; color:var(--text-muted);">Use FIDO2 FaceID/Fingerprint for transfers</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="settingsToggleBiometric" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="settings-row">
+                <div>
+                  <label style="display:block; font-weight:600; color:var(--text-primary);">Require OTP for Nudges</label>
+                  <span style="font-size:11px; color:var(--text-muted);">Require SMS confirmation before starting SIPs</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="settingsToggleOtp" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="settings-row" style="margin-top: 10px;">
+                <button class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;" onclick="alert('Security preferences synced and saved locally.')">Update Preferences</button>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h3 class="settings-section-title">Profile Configurations</h3>
+              <div class="settings-row">
+                <span style="font-size: 13px; color: var(--text-secondary);">Risk Tolerance Profile:</span>
+                <select id="settingsRiskProfile" class="auth-input" style="padding: 4px 12px; font-size: 13px; width: 140px;">
+                  <option value="CONSERVATIVE">Conservative</option>
+                  <option value="MODERATE" selected>Moderate</option>
+                  <option value="AGGRESSIVE">Aggressive</option>
+                  <option value="GROWTH">Growth</option>
+                </select>
+              </div>
+              <div class="settings-row">
+                <span style="font-size: 13px; color: var(--text-secondary);">Primary Advisory Language:</span>
+                <select id="settingsLanguage" class="auth-input" style="padding: 4px 12px; font-size: 13px; width: 140px;">
+                  <option value="en">English (en)</option>
+                  <option value="hi">Hindi (hi)</option>
+                  <option value="ta">Tamil (ta)</option>
+                </select>
+              </div>
+              <div class="settings-row" style="margin-top: auto; padding-top: 10px;">
+                <button class="btn btn-primary" style="font-size: 12px; padding: 6px 12px;" id="settingsSaveProfileBtn">Save Profile Settings</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Explain Drawer Overlay -->
+  <div id="explainDrawerOverlay" style="position: fixed; inset: 0; background: rgba(6,11,24,0.5); backdrop-filter: blur(4px); z-index: 998; opacity: 0; pointer-events: none; transition: opacity 0.2s;" onclick="closeExplainDrawer()"></div>
+  <div id="explainDrawer" style="position: fixed; top: 0; right: -420px; width: 400px; height: 100vh; background: var(--surface-raised); border-left: 1px solid var(--surface-border-accent); z-index: 999; padding: var(--space-6); overflow-y: auto; transition: right 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; gap: var(--space-4);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-family: var(--font-display); color: var(--text-primary); margin: 0;">Why am I seeing this?</h3>
+      <button onclick="closeExplainDrawer()" style="background: var(--surface-overlay); border: none; color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px;">✕</button>
+    </div>
+    <div id="explainDrawerContent" style="display: flex; flex-direction: column; gap: var(--space-4);"></div>
+  </div>
+
+  <!-- Action Success Modal -->
+  <div class="modal-overlay" id="actionSuccessModal">
+    <div class="modal-card" style="text-align: center;">
+      <div style="font-size: 52px; margin-bottom: var(--space-3); animation: pulse 0.6s ease;" id="successEmoji">✅</div>
+      <h3 id="successTitle" style="color: var(--text-success);">Action Activated!</h3>
+      <p id="successDesc" style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--space-6);">Your request has been queued and logged in the audit trail.</p>
+      <div style="background: var(--surface-overlay); border-radius: var(--radius-md); padding: var(--space-4); text-align: left; margin-bottom: var(--space-6);">
+        <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: var(--space-2);">Compliance Record</div>
+        <div style="font-size: 12px; color: var(--text-secondary);">📋 SEBI Audit Trail Entry Created<br>🔒 Encrypted with AES-256<br>🕐 Timestamp: <span id="successTimestamp"></span></div>
+      </div>
+      <button class="btn btn-primary" style="width: 100%;" onclick="document.getElementById('actionSuccessModal').classList.remove('active')">Done</button>
+    </div>
+  </div>
+
+  <!-- Step-Up Auth Modal Overlay -->
+  <div class="modal-overlay" id="stepUpAuthModal">
+    <div class="modal-card">
+      <h3>Step-up Security Verification</h3>
+      <p id="stepUpActionDescription">This high-risk action requires step-up authentication validation to prevent transaction fraud.</p>
+      
+      <div class="biometric-btn" id="biometricAuthBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+          <path d="M12 2a10 10 0 0 0-10 10c0 5.5 4.5 10 10 10s10-4.5 10-10A10 10 0 0 0 12 2zm0 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+        </svg>
+        Match Fingerprint Biometrics
+      </div>
+      
+      <div class="otp-input-group">
+        <label for="mfaOtpCode">Enter 4-Digit SMS/TOTP Verification Code</label>
+        <input type="text" id="mfaOtpCode" class="otp-field" placeholder="xxxx" maxlength="4">
+      </div>
+
+      <div style="color: var(--text-danger); font-size: 12px; margin-bottom: var(--space-4); display: none;" id="mfaErrorMsg">
+        Verification failed. Please match biometrics or enter the correct code (try '1234').
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="mfaCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="mfaVerifyBtn">Verify & Authorize</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Goal Dialog (Add/Edit) Modal -->
+  <div class="modal-overlay" id="goalModal">
+    <div class="modal-card" style="text-align: left; width: 450px;">
+      <h3 id="goalModalTitle" style="margin-bottom: var(--space-4);">Add New Financial Goal</h3>
+      <form id="goalForm" onsubmit="saveGoalAction(event)" style="display: flex; flex-direction: column; gap: var(--space-4);">
+        <input type="hidden" id="goalIndex">
+        
+        <div class="auth-form-group">
+          <label for="goalName">Goal Name</label>
+          <input type="text" id="goalName" class="auth-input" placeholder="e.g. Europe Vacation" required>
+        </div>
+        
+        <div class="auth-form-group">
+          <label for="goalDeadline">Deadline (e.g. Dec 2048)</label>
+          <input type="text" id="goalDeadline" class="auth-input" placeholder="e.g. Sep 2026" required>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+          <div class="auth-form-group">
+            <label for="goalTarget">Target Amount (₹)</label>
+            <input type="number" id="goalTarget" class="auth-input" min="1" placeholder="e.g. 500000" required>
+          </div>
+          <div class="auth-form-group">
+            <label for="goalCurrent">Currently Saved (₹)</label>
+            <input type="number" id="goalCurrent" class="auth-input" min="0" placeholder="e.g. 100000" required>
+          </div>
+        </div>
+        
+        <div class="btn-row" style="margin-top: var(--space-4);">
+          <button type="button" class="btn btn-secondary" onclick="closeGoalModal()">Cancel</button>
+          <button type="button" class="btn btn-secondary" id="goalDeleteBtn" onclick="deleteGoalAction()" style="background: rgba(239,68,68,0.1); color: var(--text-danger); border-color: rgba(239,68,68,0.2); display: none;">Delete</button>
+          <button type="submit" class="btn btn-primary" id="goalModalSubmitBtn">Save Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+  <script>
+    // Global helper so child iframe can trigger step-up auth easily
+    window.triggerGlobalStepUp = function(action, authLevel, successCallback, failureCallback) {
+      if (window.showStepUpModal) {
+        window.showStepUpModal(action, authLevel, successCallback, failureCallback);
+      } else {
+        alert("Security framework initializing... try again.");
+      }
+    };
+    
+    function goToFamilyTab() {
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      const familyBtn = document.querySelector('.nav-item[data-tab="family"]');
+      if (familyBtn) familyBtn.classList.add('active');
+      document.querySelectorAll('.subtab-content').forEach(p => p.classList.remove('active'));
+      const familyPanel = document.getElementById('tab-family');
+      if (familyPanel) familyPanel.classList.add('active');
+    }
+
+    function quickLogin(username) {
+      document.getElementById("loginUsername").value = username;
+      document.getElementById("loginPassword").value = "password123";
+      document.getElementById("loginSubmitBtn").click();
+    }
+    
+    function triggerRMHandoff() {
+      // Open the RM Copilot tab instead of a plain alert
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.querySelector('.nav-item[data-tab="rm-copilot"]').classList.add('active');
+      document.querySelectorAll('.subtab-content').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-rm-copilot').classList.add('active');
+    }
+
+    // Language toggle
+    const LANG_CYCLE = [
+      { code: 'en', label: '🌐 EN', greeting: null },
+      { code: 'hi', label: '🌐 हि', greeting: 'नमस्ते! आपका वित्तीय स्वास्थ्य स्कोर तैयार है।' },
+      { code: 'ta', label: '🌐 தமி', greeting: 'வணக்கம்! உங்கள் நிதி ஆரோக்கிய மதிப்பெண் தயார்.' }
+    ];
+    let langIdx = 0;
+    document.addEventListener('DOMContentLoaded', () => {
+      const langBtn = document.getElementById('langToggleBtn');
+      if (langBtn) {
+        langBtn.addEventListener('click', () => {
+          langIdx = (langIdx + 1) % LANG_CYCLE.length;
+          const lang = LANG_CYCLE[langIdx];
+          langBtn.textContent = lang.label;
+          document.documentElement.setAttribute('data-lang', lang.code);
+          if (lang.greeting) {
+            const speechEl = document.getElementById('avatarSpeechText');
+            if (speechEl) speechEl.textContent = `"${lang.greeting}"`;
+          } else {
+            // Restore default English greeting
+            const speechEl = document.getElementById('avatarSpeechText');
+            if (speechEl && window._lastGreeting) speechEl.textContent = window._lastGreeting;
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

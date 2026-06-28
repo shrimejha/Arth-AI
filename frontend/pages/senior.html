@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    body { background: transparent; color: #e2e8f0; font-family: 'Inter', sans-serif; padding: 1rem; font-size: 1.15rem; } /* Large Accessible Font */
+    body, .tax-box, .simulate-card, .input-field, .btn-action {
+      transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base);
+    }
+    .fraud-banner { background: rgba(239, 68, 68, 0.15); color: var(--text-danger); padding: 1.5rem; border-radius: var(--radius-lg); border: 2px solid var(--danger); display: none; align-items: center; gap: 1.5rem; margin-top: 1.5rem; }
+    .tax-box { background: var(--surface-base); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--surface-border); margin-top: 1.5rem; }
+    .simulate-card { background: var(--surface-raised); border: 1px dashed var(--surface-border-accent); border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; }
+    .input-field { background: var(--surface-bg); border: 1px solid var(--surface-border); color: white; padding: var(--space-2) var(--space-3); border-radius: 6px; font-size: 14px; width: 140px; margin-right: 10px; }
+    .btn-action { background: var(--brand-500); color: white; border: none; padding: var(--space-2) var(--space-4); border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+    .btn-action.block { background: var(--danger); }
+    .btn-action.sec { background: var(--surface-overlay); color: var(--text-secondary); border: 1px solid var(--surface-border); }
+    .btn-action:hover { opacity: 0.9; }
+
+    /* Light Mode Overrides */
+    :root.light-mode body {
+      color: #0f172a;
+    }
+    :root.light-mode .tax-box {
+      background: var(--surface-bg);
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    :root.light-mode .simulate-card {
+      background: var(--surface-bg);
+      border-color: var(--brand-400);
+      color: #0f172a;
+    }
+    :root.light-mode .input-field {
+      background: white;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    :root.light-mode .btn-action.sec {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h2 style="color: var(--brand-200); font-family: var(--font-display); font-size: 2rem; margin: 0 0 4px 0;">Senior Citizen Safety Hub</h2>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); margin: 0;">Simplified dashboard featuring enhanced security guardrails and interest optimizations.</p>
+  </div>
+  
+  <!-- Fraud Sentinel Dynamic Warning Banner -->
+  <div class="fraud-banner" id="seniorFraudBanner">
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+      <line x1="12" y1="9" x2="12" y2="13"></line>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+    <div style="flex-grow: 1;">
+      <strong style="font-size: 1.3rem;" id="fraudTitle">Fraud Sentinel Block Active</strong><br>
+      <span style="font-size: 1.05rem;" id="fraudMessage">We have detected and paused a suspicious transaction. OTP details have been flagged.</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: var(--space-2); flex-shrink: 0;">
+      <button class="btn-action block" onclick="emergencyBlock()">Emergency Block</button>
+      <button class="btn-action sec" onclick="callRM()">Call RM</button>
+    </div>
+  </div>
+
+  <div class="tax-box">
+    <h3 style="color: var(--success); margin: 0 0 0.5rem 0; font-family: var(--font-display);">Section 80TTB Tracker (Fixed Deposits)</h3>
+    <p style="margin: 0 0 1rem 0;">Senior citizens get up to <strong>₹50,000</strong> tax-free interest under Section 80TTB.</p>
+    <div style="background: var(--surface-bg); padding: 1rem; border-radius: 8px; font-size: 1.1rem; margin-bottom: 1rem;" id="ttbStats">
+      Syncing FD portfolios...
+    </div>
+    <button class="btn-action" onclick="alert('Fixed Deposit balances synced via CAMS secure gateway.')">Review fixed deposits</button>
+  </div>
+
+  <!-- Interactive Security Simulator Widget -->
+  <div class="simulate-card">
+    <h4 style="color: var(--brand-200); margin: 0 0 0.5rem 0; font-family: var(--font-display);">Security sandbox: Simulate Outflows</h4>
+    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 1rem;">Test the Fraud Sentinel velocity rules (e.g. VR003 triggers for Senior transaction outflow > ₹50,000).</p>
+    <div>
+      <label for="txnAmountInput" style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Outflow Transfer Amount (₹):</label>
+      <input type="number" id="txnAmountInput" class="input-field" value="60000" placeholder="Amount in Rs">
+      <button class="btn-action" id="simulateTxBtn">Execute Outflow</button>
+    </div>
+    <div style="font-size: 12px; color: var(--text-muted); margin-top: 10px;" id="simStatus"></div>
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('userId') || "22222222-2222-2222-2222-222222222222";
+      
+      await loadTTBDetails(userId);
+      
+      document.getElementById("simulateTxBtn").addEventListener("click", async () => {
+        const amt = parseFloat(document.getElementById("txnAmountInput").value);
+        const status = document.getElementById("simStatus");
+        status.textContent = "Processing velocity algorithms...";
+        
+        try {
+          const res = await fetch(`${API_BASE}/api/fraud/detect`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: userId,
+              transaction_amount: amt,
+              is_new_beneficiary: amt > 50000, // Simulate new beneficiary for large sums
+              device_hash: "hash_unrecognized_device_456" // Simulate unrecognized device
+            })
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            if (data.is_anomaly) {
+              const banner = document.getElementById("seniorFraudBanner");
+              const top = data.signals[0] || { description: "Unusual transaction velocity alert." };
+              
+              banner.style.display = "flex";
+              document.getElementById("fraudTitle").textContent = "Fraud Sentinel: paused transfer";
+              document.getElementById("fraudMessage").textContent = `${top.description}. Severity: ${data.card.accent.toUpperCase()} block. Risk Index: ${(top.risk_score * 100).toFixed(0)}%.`;
+              
+              status.innerHTML = `<span style="color:var(--text-danger)">Blocked. Fraud Event logged in compliance audit trail.</span>`;
+              
+              // Refresh parent dashboard cards list so the new alert card appears instantly!
+              if (window.parent && window.parent.loadDashboard) {
+                window.parent.loadDashboard(userId);
+              }
+            } else {
+              document.getElementById("seniorFraudBanner").style.display = "none";
+              status.innerHTML = `<span style="color:var(--text-success)">Transaction authorized (below velocity thresholds).</span>`;
+            }
+          }
+        } catch (err) {
+          console.error("Simulation failed:", err);
+        }
+      });
+    });
+
+    async function loadTTBDetails(userId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/profile/${userId}`);
+        if (!res.ok) throw new Error("Load failed");
+        const data = await res.json();
+        
+        const fdInterest = data.tax_profile ? (data.tax_profile.fd_interest_earned_paise / 100.0) : 22000;
+        const eligible = Math.min(fdInterest, 50000);
+        const remaining = Math.max(50000 - fdInterest, 0);
+        
+        document.getElementById("ttbStats").innerHTML = `
+          Interest Earned: <strong>₹${fdInterest.toLocaleString('en-IN')}</strong><br>
+          Eligible Deduction: <strong>₹${eligible.toLocaleString('en-IN')}</strong><br>
+          Remaining Room: <strong style="color:var(--text-accent)">₹${remaining.toLocaleString('en-IN')}</strong>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function emergencyBlock() {
+      alert('Account Locked. All UPI transfers and debit cards blocked. Access can be restored via branch KYC verification.');
+    }
+
+    function callRM() {
+      alert('Your RM Sahaya has been notified and will call you on your registered mobile number in 2 minutes.');
+    }
+  </script>
+</body>
+</html>

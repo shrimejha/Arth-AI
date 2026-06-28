@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relationship Manager (RM) Copilot Dashboard</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    body {
+      background-color: var(--surface-bg);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      padding: var(--space-6);
+      margin: 0;
+      min-height: 100vh;
+    }
+    .rm-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--space-6);
+    }
+    .rm-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+    .badge-alert {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--text-danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+    .badge-ok {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--text-success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+    .action-item-card {
+      background: var(--surface-base);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all var(--transition-fast);
+    }
+    .action-item-card:hover {
+      border-color: var(--brand-400);
+      background: var(--surface-overlay);
+    }
+  </style>
+</head>
+<body>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6); border-bottom: 1px solid var(--surface-border); padding-bottom: var(--space-4);">
+    <div>
+      <h2 style="font-family: var(--font-display); color: var(--text-primary); margin: 0;">RM Copilot Panel</h2>
+      <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0 0;">Augmented human advisor workspace &amp; regulatory oversight system.</p>
+    </div>
+    <span class="badge-ok">Compliance Locked (SEBI IA V2)</span>
+  </div>
+
+  <div class="rm-grid">
+    <!-- Left Column: Client Dossier & Flags -->
+    <div class="rm-section">
+      <div class="card" style="padding: var(--space-5);">
+        <h3 class="card-title" style="margin-bottom: var(--space-4);">AI-Generated Client Summary</h3>
+        <div style="background: var(--surface-overlay); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-4);">
+          <div style="font-size: 12px; font-weight: 700; color: var(--text-accent); margin-bottom: 4px;">Advisor Brief (Auto-Compiled)</div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+            Client is an active 28-year-old corporate worker with moderate risk profile. High concentration of assets in Equity (75%) creates minor volatility risk. High tax saving headroom detected (₹1.5L remains under Section 80C). Highly active UPI spending pattern. Has consented to spending and tax analytics.
+          </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4);">
+          <div style="background: var(--surface-bg); padding: var(--space-3); border-radius: var(--radius-md); text-align: center;">
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">WHS Index</div>
+            <div style="font-size: 20px; font-weight: 800; color: var(--text-accent); margin-top: 4px;">56/100</div>
+          </div>
+          <div style="background: var(--surface-bg); padding: var(--space-3); border-radius: var(--radius-md); text-align: center;">
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">DPDP Status</div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-success); margin-top: 8px;">Active Consents</div>
+          </div>
+          <div style="background: var(--surface-bg); padding: var(--space-3); border-radius: var(--radius-md); text-align: center;">
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Last RM Call</div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-muted); margin-top: 8px;">Never (New)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding: var(--space-5);">
+        <h3 class="card-title" style="margin-bottom: var(--space-4);">Risk &amp; Suitability Monitoring</h3>
+        <table class="family-table">
+          <thead>
+            <tr>
+              <th>Risk Flag</th>
+              <th>System Status</th>
+              <th>Trigger Rule</th>
+              <th>Recommended RM Mitigation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Portfolio Drift</strong></td>
+              <td><span class="badge-alert">Flagged</span></td>
+              <td>Equity > 70% for moderate profile</td>
+              <td>Recommend partial profit booking to Liquid/Debt fund</td>
+            </tr>
+            <tr>
+              <td><strong>80C Headroom</strong></td>
+              <td><span class="badge-alert">Flagged</span></td>
+              <td>Unutilized tax saving limit in Q4</td>
+              <td>Suggest ELSS SIP setup prior to tax season deadline</td>
+            </tr>
+            <tr>
+              <td><strong>Fraud Sentinel</strong></td>
+              <td><span class="badge-ok">Clean</span></td>
+              <td>Outflow velocity checker</td>
+              <td>No flags. MFA level 2 enforcement active.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right Column: Next Best Actions -->
+    <div class="rm-section">
+      <div class="card" style="padding: var(--space-5);">
+        <h3 class="card-title" style="margin-bottom: var(--space-4);">Next Best Actions (NBAs)</h3>
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div class="action-item-card">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: var(--text-primary);">Pitch ELSS Tax SIP</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Deploy ₹15,000 to save taxes.</div>
+            </div>
+            <button class="btn btn-primary" style="font-size: 10px; padding: 4px 8px; flex: none;" onclick="alert('ELSS brief copied to clipboard. Ready to send.')">Copy Pitch</button>
+          </div>
+          
+          <div class="action-item-card">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: var(--text-primary);">Initiate Call Scheduler</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Resolve portfolio equity drift.</div>
+            </div>
+            <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 8px; flex: none;" onclick="alert('Meeting scheduler link generated.')">Schedule</button>
+          </div>
+
+          <div class="action-item-card">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: var(--text-primary);">Update KYC Verification</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Re-confirm FATCA status.</div>
+            </div>
+            <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 8px; flex: none;" onclick="alert('KYC request sent to client.')">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

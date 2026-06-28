@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    body { background: transparent; color: #e2e8f0; font-family: 'Inter', sans-serif; padding: 1rem; }
+    body, .stat-box, .chart-container {
+      transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base);
+    }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1.5rem; }
+    .stat-box { background: var(--surface-base); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--surface-border); text-align: center; }
+    .val { font-size: 2rem; font-weight: 700; color: var(--success); margin: 0.5rem 0; }
+    .chart-container { margin-top: 2rem; background: var(--surface-raised); padding: 1.5rem; border-radius: 12px; }
+    .btn-split { background: var(--brand-500); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 1rem; }
+    .btn-split:hover { background: var(--brand-400); }
+
+    /* Light Mode Overrides */
+    :root.light-mode body {
+      color: #0f172a;
+    }
+    :root.light-mode .stat-box {
+      background: var(--surface-bg);
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    :root.light-mode .chart-container {
+      background: var(--surface-bg);
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h2 style="color: var(--brand-200); font-family: var(--font-display); margin: 0 0 4px 0;">Young Employed: Salary Splitter</h2>
+    <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Allocate net take-home salary across essential needs, discretionary wants, and tax-saving SIP investments.</p>
+  </div>
+  
+  <div class="stats-grid" id="splitStats">
+    <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Syncing transaction parameters...</div>
+  </div>
+
+  <div class="chart-container">
+    <h4 style="color: var(--brand-200); margin: 0 0 1rem 0; font-family: var(--font-display);">Recommended Investment Allocation (20% Target)</h4>
+    <div style="display: flex; justify-content: space-around; text-align: center;" id="investStats">
+      <!-- Populated dynamically -->
+    </div>
+    
+    <div style="text-align: center; margin-top: 1.5rem; border-top: 1px solid var(--surface-glass); padding-top: 1rem;">
+      <button class="btn-split" id="splitConfirmBtn">Approve & Execute SIP Allocation</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('userId') || "11111111-1111-1111-1111-111111111111";
+      
+      try {
+        const res = await fetch(`${API_BASE}/api/profile/${userId}`);
+        if (!res.ok) throw new Error("Failed to load details");
+        const data = await res.json();
+        
+        // Find salary credit transaction
+        const salTx = data.transactions.find(t => t.spend_category === 'SALARY') || { amount_paise: 8500000 };
+        const salary = salTx.amount_paise / 100.0;
+        
+        // Calculate 50-30-20 Split
+        const needs = Math.round(salary * 0.50);
+        const wants = Math.round(salary * 0.30);
+        const investments = Math.round(salary * 0.20);
+        
+        // Investment detail allocations
+        const elss = Math.round(investments * 0.40);
+        const indexFund = Math.round(investments * 0.40);
+        const emergency = Math.round(investments * 0.20);
+        
+        document.getElementById('splitStats').innerHTML = `
+          <div class="stat-box"><div style="color:var(--text-secondary)">Needs (50%)</div><div class="val" style="color:var(--text-accent)">₹${needs.toLocaleString('en-IN')}</div></div>
+          <div class="stat-box"><div style="color:var(--text-secondary)">Wants (30%)</div><div class="val" style="color:var(--warning)">₹${wants.toLocaleString('en-IN')}</div></div>
+          <div class="stat-box"><div style="color:var(--text-secondary)">Investments (20%)</div><div class="val" style="color:var(--success)">₹${investments.toLocaleString('en-IN')}</div></div>
+        `;
+
+        document.getElementById('investStats').innerHTML = `
+          <div><strong>ELSS Tax-Saver SIP</strong><br><span style="color:var(--success); font-size: 18px; font-weight: 700;">₹${elss.toLocaleString('en-IN')}</span></div>
+          <div><strong>Nifty 50 Index Fund</strong><br><span style="color:var(--text-accent); font-size: 18px; font-weight: 700;">₹${indexFund.toLocaleString('en-IN')}</span></div>
+          <div><strong>Liquid Emergency Fund</strong><br><span style="color:var(--warning); font-size: 18px; font-weight: 700;">₹${emergency.toLocaleString('en-IN')}</span></div>
+        `;
+        
+        // Handle split confirmation with Step-Up Auth
+        document.getElementById("splitConfirmBtn").addEventListener("click", () => {
+          if (window.parent && window.parent.triggerGlobalStepUp) {
+            window.parent.triggerGlobalStepUp(
+              "EXECUTE_SALARY_SPLIT",
+              2, // L2 auth
+              () => {
+                alert("Salary Split Executed! ₹" + investments.toLocaleString('en-IN') + " has been successfully distributed into your SIP portfolios and Emergency Reserve. SMS notification sent.");
+              },
+              () => {
+                console.log("Salary split authentication cancelled.");
+              }
+            );
+          } else {
+            alert("Security challenge authorization matches are starting...");
+          }
+        });
+        
+      } catch (err) {
+        console.error("Iframe load error:", err);
+      }
+    });
+  </script>
+</body>
+</html>

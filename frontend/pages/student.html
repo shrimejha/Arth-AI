@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    body { background: transparent; color: #e2e8f0; font-family: 'Inter', sans-serif; padding: 1rem; }
+    body, h4, .slider-card, .timeline {
+      transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base);
+    }
+    .timeline { border-left: 3px solid var(--brand-500); padding-left: 2rem; margin: 2rem 0 0 2rem; position: relative; }
+    .timeline-item { margin-bottom: 2rem; position: relative; }
+    .timeline-item::before { content: ''; position: absolute; left: -2.6rem; top: 0; width: 1rem; height: 1rem; background: var(--gold-400); border-radius: 50%; border: 3px solid var(--surface-bg); }
+    h4 { color: var(--brand-200); margin: 0 0 0.5rem 0; font-family: var(--font-display); }
+    .slider-card { background: var(--surface-base); border: 1px solid var(--surface-border); border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; }
+    .range-slider { width: 100%; margin: 10px 0; }
+
+    /* Light Mode Overrides */
+    :root.light-mode body {
+      color: #0f172a;
+    }
+    :root.light-mode h4 {
+      color: var(--brand-500);
+    }
+    :root.light-mode .slider-card {
+      background: var(--surface-bg);
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h2 style="color: var(--brand-200); font-family: var(--font-display); margin: 0 0 4px 0;">Student Career Timeline</h2>
+    <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Map future earning trajectories to early compound investments.</p>
+  </div>
+  
+  <div class="timeline">
+    <div class="timeline-item">
+      <h4>Freelance Income (Current)</h4>
+      <p>Start a micro-SIP of ₹500/mo into a Nifty 50 Index Fund.</p>
+    </div>
+    <div class="timeline-item">
+      <h4>Graduation (In 2 Years)</h4>
+      <p>Build an emergency fund covering 3 months of basic expenses.</p>
+    </div>
+    <div class="timeline-item">
+      <h4>First Job (In 2.5 Years)</h4>
+      <p>Tax literacy module unlocks. Learn about Section 80C.</p>
+    </div>
+  </div>
+
+  <div class="slider-card">
+    <h4 style="color: var(--gold-300); margin: 0 0 0.5rem 0;">Micro-Savings Calculator</h4>
+    <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 10px 0;">Slide to adjust your monthly savings. See estimated 5-year corpus at 12% CAGR.</p>
+    <div>
+      <input type="range" id="sipSlider" class="range-slider" min="100" max="5000" step="100" value="500">
+      <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px;">
+        <span>SIP Amount: <span style="color:var(--text-accent)">₹<span id="sipVal">500</span>/mo</span></span>
+        <span>5-Yr Value: <span style="color:var(--success)">₹<span id="corpusVal">40,000</span></span></span>
+      </div>
+      <button class="btn-primary" style="padding: 6px var(--space-4); font-size: 13px;" id="investBtn">Start Micro-SIP</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const slider = document.getElementById("sipSlider");
+      const sipVal = document.getElementById("sipVal");
+      const corpusVal = document.getElementById("corpusVal");
+      
+      const updateVal = () => {
+        const val = parseInt(slider.value);
+        sipVal.textContent = val.toLocaleString('en-IN');
+        // Simple FV calculator: FV = P * [((1 + r)^n - 1) / r] * (1 + r)
+        const r = 0.12 / 12;
+        const n = 60; // 5 years
+        const fv = val * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+        corpusVal.textContent = Math.round(fv).toLocaleString('en-IN');
+      };
+      
+      slider.addEventListener("input", updateVal);
+      updateVal();
+      
+      document.getElementById("investBtn").addEventListener("click", () => {
+        // Suitability Gate check simulation
+        if (window.parent && window.parent.triggerGlobalStepUp) {
+          window.parent.triggerGlobalStepUp(
+            "START_STUDENT_SIP",
+            1, // standard L1 standard redirect
+            () => {
+              alert("Micro-SIP authorized! Suitability validated against risk profile (AGGRESSIVE). SIP registered.");
+            },
+            () => {}
+          );
+        }
+      });
+    });
+  </script>
+</body>
+</html>
