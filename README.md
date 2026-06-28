@@ -1,4 +1,4 @@
-# 🤖 Avatar Base — AI-Powered Digital Wealth Management System
+#Avatar Base — AI-Powered Digital Wealth Management System
 
 > **Production-Grade** | **SEBI Compliant** | **DPDP Act 2023 Aligned** | **RBI Data-Localized**
 
@@ -6,7 +6,7 @@ A comprehensive, compliant AI-powered wealth advisory platform integrated into r
 
 ---
 
-## 🏗️ Repository Structure
+## Repository Structure
 
 ```
 Projects Fin/
@@ -49,7 +49,7 @@ Projects Fin/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Frontend-Only Mock Mode (No Python Setup Needed)
 If you just want to run the frontend dashboard instantly using static mock data:
@@ -78,7 +78,7 @@ python serve.py
 
 ---
 
-## 🎯 Key Modules & Features
+## Key Modules & Features
 
 | Module | Highlights & Implementation |
 |--------|-----------------------------|
@@ -92,7 +92,7 @@ python serve.py
 
 ---
 
-## 🔐 Compliance Frameworks
+## Compliance Frameworks
 
 - ✅ **DPDP Act 2023 Aligned:** Granular per-category consent checkboxes (Spending, Investments, Tax, Insurance). Consents are verified prior to profiling and can be revoked dynamically.
 - ✅ **RBI Data-Localization:** All transaction registries and client vaults are isolated to local instances simulated in local SQLite datasets.
