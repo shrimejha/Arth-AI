@@ -1,4 +1,4 @@
-#Avatar Base — AI-Powered Digital Wealth Management System
+# Avatar Base — AI-Powered Digital Wealth Management System
 
 > **Production-Grade** | **SEBI Compliant** | **DPDP Act 2023 Aligned** | **RBI Data-Localized**
 
